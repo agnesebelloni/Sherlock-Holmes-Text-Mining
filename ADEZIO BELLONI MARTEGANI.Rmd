@@ -1,0 +1,181 @@
+---
+title: 'PROGETTO DATA MINING: Text mining Sherlock Holmes'
+author: "Giuditta ADEZIO, Agnese BELLONI, Luca MARTEGANI"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Questo progetto mira a un'analisi approfondita dei libri di Sherlock Holmes attraverso tecniche di text mining. 
+
+
+## ANALISI ESPLORATIVA CON MONDO TIDYVERSE
+Dopo aver importato alcune library, che ci saranno utili nelle analisi successive, e aver importato i documenti attraverso la library sherlock presente nella directory di Github suddetta, selezioniamo un solo libro per analizzarne i singoli termini.
+Il libro in questione è "A Study In Scarlet".
+```{r}
+# devtools::install_github("EmilHvitfeldt/sherlock")
+library(sherlock)
+library(tidyverse)
+library(stringr)
+library(tidytext)
+
+sherlock::holmes
+str(holmes)
+summary(holmes)
+head(holmes)
+
+unique(holmes$book)
+
+astudyinscarlet <- holmes %>% 
+                      filter(book == 'A Study In Scarlet')
+astudyinscarlet <- astudyinscarlet %>%
+                             select(text) %>%
+                               mutate(chapter = cumsum(str_detect(text, "^CHAPTER")))
+astudyinscarlet %>%
+  unnest_tokens(word, text)
+
+```
+
+Selezionando una lista di libri di nostro interesse abbiamo quindi ripetuto la stessa
+cosa che avevamo già fatto per il primo (A Study in Scarlet) mettendo tutti i termini in un tibble con le singole parole, affiancate a ogni libro in cui esse vengono utilizzate.
+```{r}
+titles <- c('A Study In Scarlet',"A Scandal in Bohemia", 
+            "The Adventure of the Devil's Foot", "The Hound of the Baskervilles", 
+            "The Red-Headed League", "His Last Bow")
+
+books <- list(filter(holmes, book == "A Study In Scarlet"), 
+              filter(holmes, book == "A Scandal in Bohemia"),
+              filter(holmes, book == "The Adventure of the Devil's Foot"),
+              filter(holmes, book == "The Hound of the Baskervilles"),
+              filter(holmes, book == "The Red-Headed League"),
+              filter(holmes, book == "His Last Bow") )
+
+series <- tibble()
+
+for (i in seq_along(titles)) {
+  clean <- books[[i]]%>%
+    select(text)%>%
+    mutate(chapter = cumsum(str_detect(text, "^CHAPTER"))) %>%
+    unnest_tokens(word, text) %>%
+    mutate(book = titles[i]) %>%
+    select(book, everything())
+  
+  series <- rbind(series, clean)
+  
+}
+
+series
+series$book <- factor(series$book, levels = rev(titles))
+```
+
+Adesso eseguendo l'azione di eliminazione delle stopwords contiamo quante volte ogni termine viene ripetuto, considerando tutti i libri scelti in precendenza congiuntamente.
+```{r}
+numero <- series %>% 
+  anti_join(stop_words) %>% 
+    count(word, sort = T)
+numero
+```
+Ne ricaviamo che le parole più utilizzate sono Holmes e Sir che risultano ripetute molte più volte della terza parola in quest'ordine (time).
+
+Rappresentiamo graficamente le parole più utilizzate divise per libro.
+```{r}
+library(RColorBrewer)
+
+df <- series %>%
+        anti_join(stop_words) %>%
+        group_by(book) %>%
+        count(word, sort = TRUE) %>%
+        top_n(10) %>%
+        ungroup() %>%
+        mutate(book = factor(book, levels = titles),
+              text_order = nrow(.):1)
+  
+ggplot(df, aes(reorder(word, n), n, fill = book)) +
+  geom_bar(stat = "identity", color = 'black') +
+  facet_wrap(~ book, scales = "free_y") +
+  labs(x = NULL, y = "Frequency") +
+  coord_flip()+
+  scale_fill_brewer(palette = 'Pastel2') + 
+  theme(legend.position="none") 
+
+
+```
+
+Calcoliamo di seguito le frequenze relative di utilizzo dei termini rispetto a tutti i libri e relativamente a ogni singolo libro.
+```{r}
+sherlock_pct <- series %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  transmute(word, all_words = n / sum(n))
+
+(frequency <- series %>%
+  anti_join(stop_words) %>%
+  count(book, word) %>%
+  mutate(book_words = n / sum(n)) %>%
+  left_join(sherlock_pct) %>%
+  arrange(desc(book_words)) %>%
+  ungroup())
+
+```
+Notiamo facilmente da questa tabella che il libro The Hound of the Baskervilles
+probabilmente è molto più lungo degli altri o ripete molto spesso le stesse parole dal momento che tutte le parole della top 10 di tale libro sono nelle prime 10 assolute.
+
+
+Poi calcoliamo un tibble che riporta la correlazione tra le parole di ogni libro e quelle totali calcolandone anche il pvalue per valutarne la significatività.
+```{r}
+
+(corr <- frequency %>%
+        group_by(book) %>%
+           summarize(correlation = cor(book_words, all_words),
+              p_value = cor.test(book_words, all_words)$p.value) %>%
+           arrange(desc(correlation)))
+
+```
+La correlazione maggiore si ha con le parole di The Hound of the Baskervilles.
+
+Dal tibble delle frequenze calcolato in precedenza salviamo adesso le 60 parole più utilizzate in ogni libro e rappresentiamo graficamente le percentuali di parole ripetute di più in generale colorandole per libro. 
+```{r}
+top_60 <- frequency %>%
+  arrange(desc(book_words)) %>%
+  top_n(60) 
+
+ggplot(top_60, aes(x = reorder(word, -book_words), y = book_words, fill = book)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = NULL, y = "PERCENTUALE DI PAROLE TOTALI") +
+  scale_fill_manual(values = c('navy', 'seagreen2', 'blue', 'purple1', 'magenta', 'olivedrab2', 'violet')) +
+  theme_minimal() 
+```
+
+Per concludere quest'analisi iniziale, rappresentiamo graficamente con una wordcloud le parole più usate in questi sei libri scelti. 
+```{r}
+library(wordcloud)
+set.seed(123)
+
+wordcloud(numero$word, numero$n, min.freq = 40, colors = viridis::plasma(30))
+```
+Come precedentemente detto dal grafico si evince che le parole Holmes e sir sono state utilizzate in numero molto più elevato rispetto alle altre.
+
+
+## ANALISI DEL CORPUS CON DOCUMENT TERM
+Per la successiva analisi importiamo le library necessarie al text mining e carichiamo gli stessi 56 libri, che si trovano nella library utilizzata fino a questo momento, come file di testo per creare in maniera più comoda un Corpus. Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile.  
+```{r}
+library(tm)
+library(SnowballC)
+
+sh <- sherlock::holmes
+dati <- VCorpus(VectorSource(sh))
+
+dati <- tm_map(dati, removePunctuation)
+dati <- tm_map(dati, removeNumbers)
+dati <- tm_map(dati, content_transformer(tolower))
+
+dati <- tm_map(dati, removeWords, stopwords('english'))
+dati <- tm_map(dati, stripWhitespace)
+```
+
+
+
