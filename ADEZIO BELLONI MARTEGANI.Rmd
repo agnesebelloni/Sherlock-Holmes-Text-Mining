@@ -9,12 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Questo progetto mira a un'analisi approfondita dei libri di Sherlock Holmes attraverso tecniche di text mining. 
-
+Questo progetto mira a un'analisi approfondita dei libri di Sherlock Holmes attraverso tecniche di text mining.
 
 ## ANALISI ESPLORATIVA CON MONDO TIDYVERSE
-Dopo aver importato alcune library, che ci saranno utili nelle analisi successive, e aver importato i documenti attraverso la library sherlock presente nella directory di Github suddetta, selezioniamo un solo libro per analizzarne i singoli termini.
-Il libro in questione è "A Study In Scarlet".
+
+Dopo aver importato alcune library, che ci saranno utili nelle analisi successive, e aver importato i documenti attraverso la library sherlock presente nella directory di Github suddetta, selezioniamo un solo libro per analizzarne i singoli termini. Il libro in questione è "A Study In Scarlet".
+
 ```{r}
 # devtools::install_github("EmilHvitfeldt/sherlock")
 library(sherlock)
@@ -39,8 +39,8 @@ astudyinscarlet %>%
 
 ```
 
-Selezionando una lista di libri di nostro interesse abbiamo quindi ripetuto la stessa
-cosa che avevamo già fatto per il primo (A Study in Scarlet) mettendo tutti i termini in un tibble con le singole parole, affiancate a ogni libro in cui esse vengono utilizzate.
+Selezionando una lista di libri di nostro interesse abbiamo quindi ripetuto la stessa cosa che avevamo già fatto per il primo (A Study in Scarlet) mettendo tutti i termini in un tibble con le singole parole, affiancate a ogni libro in cui esse vengono utilizzate.
+
 ```{r}
 titles <- c('A Study In Scarlet',"A Scandal in Bohemia", 
             "The Adventure of the Devil's Foot", "The Hound of the Baskervilles", 
@@ -72,15 +72,18 @@ series$book <- factor(series$book, levels = rev(titles))
 ```
 
 Adesso eseguendo l'azione di eliminazione delle stopwords contiamo quante volte ogni termine viene ripetuto, considerando tutti i libri scelti in precendenza congiuntamente.
+
 ```{r}
 numero <- series %>% 
   anti_join(stop_words) %>% 
     count(word, sort = T)
 numero
 ```
+
 Ne ricaviamo che le parole più utilizzate sono Holmes e Sir che risultano ripetute molte più volte della terza parola in quest'ordine (time).
 
 Rappresentiamo graficamente le parole più utilizzate divise per libro.
+
 ```{r}
 library(RColorBrewer)
 
@@ -105,6 +108,7 @@ ggplot(df, aes(reorder(word, n), n, fill = book)) +
 ```
 
 Calcoliamo di seguito le frequenze relative di utilizzo dei termini rispetto a tutti i libri e relativamente a ogni singolo libro.
+
 ```{r}
 sherlock_pct <- series %>%
   anti_join(stop_words) %>%
@@ -120,11 +124,11 @@ sherlock_pct <- series %>%
   ungroup())
 
 ```
-Notiamo facilmente da questa tabella che il libro The Hound of the Baskervilles
-probabilmente è molto più lungo degli altri o ripete molto spesso le stesse parole dal momento che tutte le parole della top 10 di tale libro sono nelle prime 10 assolute.
 
+Notiamo facilmente da questa tabella che il libro The Hound of the Baskervilles probabilmente è molto più lungo degli altri o ripete molto spesso le stesse parole dal momento che tutte le parole della top 10 di tale libro sono nelle prime 10 assolute.
 
 Poi calcoliamo un tibble che riporta la correlazione tra le parole di ogni libro e quelle totali calcolandone anche il pvalue per valutarne la significatività.
+
 ```{r}
 
 (corr <- frequency %>%
@@ -134,9 +138,11 @@ Poi calcoliamo un tibble che riporta la correlazione tra le parole di ogni libro
            arrange(desc(correlation)))
 
 ```
+
 La correlazione maggiore si ha con le parole di The Hound of the Baskervilles.
 
-Dal tibble delle frequenze calcolato in precedenza salviamo adesso le 60 parole più utilizzate in ogni libro e rappresentiamo graficamente le percentuali di parole ripetute di più in generale colorandole per libro. 
+Dal tibble delle frequenze calcolato in precedenza salviamo adesso le 60 parole più utilizzate in ogni libro e rappresentiamo graficamente le percentuali di parole ripetute di più in generale colorandole per libro.
+
 ```{r}
 top_60 <- frequency %>%
   arrange(desc(book_words)) %>%
@@ -150,18 +156,21 @@ ggplot(top_60, aes(x = reorder(word, -book_words), y = book_words, fill = book))
   theme_minimal() 
 ```
 
-Per concludere quest'analisi iniziale, rappresentiamo graficamente con una wordcloud le parole più usate in questi sei libri scelti. 
+Per concludere quest'analisi iniziale, rappresentiamo graficamente con una wordcloud le parole più usate in questi sei libri scelti.
+
 ```{r}
 library(wordcloud)
 set.seed(123)
 
 wordcloud(numero$word, numero$n, min.freq = 40, colors = viridis::plasma(30))
 ```
+
 Come precedentemente detto dal grafico si evince che le parole Holmes e sir sono state utilizzate in numero molto più elevato rispetto alle altre.
 
-
 ## ANALISI DEL CORPUS CON DOCUMENT TERM
-Per la successiva analisi importiamo le library necessarie al text mining e carichiamo gli stessi 56 libri, che si trovano nella library utilizzata fino a questo momento, come file di testo per creare in maniera più comoda un Corpus. Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile.  
+
+Per la successiva analisi importiamo le library necessarie al text mining e carichiamo gli stessi 56 libri, che si trovano nella library utilizzata fino a questo momento, come file di testo per creare in maniera più comoda un Corpus. Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile.
+
 ```{r}
 library(tm)
 library(SnowballC)
@@ -177,5 +186,158 @@ dati <- tm_map(dati, removeWords, stopwords('english'))
 dati <- tm_map(dati, stripWhitespace)
 ```
 
+```{r}
+testo_corpus <- sapply(dati, as.character)
+```
 
+Filtro le parole nel corpus trasformato in testo per cercare di cosa siano alcune radici
 
+```{r}
+(parole_speckl <- unlist(str_extract_all(testo_corpus, "\\bspeckl\\w*\\b")))
+(parole_lodg <- unlist(str_extract_all(testo_corpus, "\\blodg\\w*\\b")))
+(parole_nobl <- unlist(str_extract_all(testo_corpus, "\\bnobl\\w*\\b")))
+(parole_boscomb <- unlist(str_extract_all(testo_corpus, "\\bboscomb\\w*\\b")))
+(parole_beech <- unlist(str_extract_all(testo_corpus, "\\bbeech\\w*\\b"))) # faggio
+(parole_grang <- unlist(str_extract_all(testo_corpus, "\\bgrang\\w*\\b")))
+(parole_holm <- unlist(str_extract_all(testo_corpus, "\\bholmesesesd\\w*\\b"))) # mi dice numeric 0 ma se stampo freq ord mi dice che ce ne sono 340
+(parole_dwhat <- unlist(str_extract_all(testo_corpus, "\\bdthe\\w*\\b"))) # non so cosa significa
+```
+
+Modifico alcune parole con radice simile ad altre per farle risultare uguali
+
+```{r}
+dati <- tm_map(dati, stemDocument)
+
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'baskervill', 
+               replacement = 'baskerville')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'adventur', 
+               replacement = 'adventure')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'studi', 
+               replacement = 'study')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'hous', 
+               replacement = 'house')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'misteri', 
+               replacement = 'mistery')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'ladi', 
+               replacement = 'lady')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'priori', 
+               replacement = 'priority')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'holm', 
+               replacement = 'holmes')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'speckl', 
+               replacement = 'speckled')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'mysteri', 
+               replacement = 'mystery')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'lodg', 
+               replacement = 'lodge')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'nobl', 
+               replacement = 'noble')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'boscomb', 
+               replacement = 'boscombe')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'grang', 
+               replacement = 'grange')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'leagu', 
+               replacement = 'league')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'therefor', 
+               replacement = 'therefore')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'outsid', 
+               replacement = 'outside')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'forc', 
+               replacement = 'force')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'terribl', 
+               replacement = 'terrible')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'littl', 
+               replacement = 'little')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'everi', 
+               replacement = 'every')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'howev', 
+               replacement = 'however')
+```
+
+Creo una Document-Term matrix per analizzare i documenti e relativi termini
+
+```{r}
+dtm <- DocumentTermMatrix(dati)
+
+str(dtm)
+inspect(dtm[1:2, 100:105])
+
+freq <- colSums(as.matrix(dtm))
+length(freq)
+
+ord <- order(freq, decreasing = T)
+freq[head(ord, 100)]
+freq[tail(ord)]
+```
+
+Seleziono le prime 30 parole con frequenza maggiore nei testi
+
+```{r}
+mfw <- freq[head(ord, 30)]
+
+wf <- data.frame(term = names(freq),
+                 occurrences = freq)
+
+findFreqTerms(dtm, lowfreq = 100)
+```
+
+Creo un istogramma con le parole più frequenti, prendendo quelle che si presentano almeno 800 volte
+
+```{r}
+library(ggplot2)
+ggplot(subset(wf, freq > 800), aes(term, occurrences)) +
+  geom_bar(stat = 'identity', fill = 'slateblue') +
+  coord_flip() +
+  labs(title = 'parole più frequenti')
+```
+
+Di seguito un altro grafico per le parole più frequenti, questa volta con wordcloud
+
+```{r}
+library(wordcloud)
+wordcloud(names(freq), freq, min.freq = 300, colors = viridis::plasma(100))
+```
+
+Creo una Document-Term matrix con solamente le 30 parole più frequenti trovate in precedenza, convertendola poi in matrice per le successive analisi
+
+```{r}
+new_dtm <- dtm[, names(mfw)]
+matrix <- as.matrix(t(new_dtm))
+```
+
+Definisco i cluster cominciando con il clustering gerarchico e rappresento il dendogramma
+
+```{r}
+d <- dist(matrix)
+gruppi <- hclust(d, method = 'ward.D2')
+plot(gruppi, hang = -1)
+```
+
+Divido in 4 gruppi
+
+```{r}
+cutree(gruppi, 4)
+```
+
+Provo ad individuare i gruppi anche con il metodo delle K-Medie, con K=4
+
+```{r}
+kfit <- kmeans(d, centers = 4, nstart = 2)
+par(lwd = 2)
+rect.hclust(gruppi, k = 4, border = 'olivedrab2')
+```
+
+Rappresento i 4 gruppi con il grafico clusplot
+
+```{r}
+par(lwd = 1)
+library(cluster)
+clusplot(as.matrix(d), kfit$cluster, color = T, shade = T, labels = 1, lines = 0)
+```
+
+Visualizzo i centroidi per ogni cluster e, successivamente, la dimensione degli stessi cluster
+
+```{r}
+print(kfit)
+kfit$size
+```
