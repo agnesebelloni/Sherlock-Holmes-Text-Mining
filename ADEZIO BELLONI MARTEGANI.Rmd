@@ -167,12 +167,20 @@ set.seed(123)
 wordcloud(numero$word, numero$n, min.freq = 40, colors = viridis::plasma(30))
 ```
 
-Come precedentemente detto dal grafico si evince che le parole Holmes e sir sono state utilizzate in numero molto più elevato rispetto alle altre. La parola sir ci inizia già a suggerire in che contesto storico è ambientata la storia. 
+Come precedentemente detto dal grafico si evince che le parole Holmes e sir sono state utilizzate in numero molto più elevato rispetto alle altre. La parola sir ci inizia già a suggerire in che contesto storico è ambientata la storia.
 
 ## ANALISI DEL CORPUS CON DOCUMENT TERM
 
-Per la successiva analisi importiamo le library necessarie al text mining senza tidyverse e carichiamo 56 libri, molti dei quali si trovavano anche nella library utilizzata fino a questo momento, come file di testo, per creare in maniera più comoda un Corpus. 
-Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile.
+Per la successiva analisi importiamo le library necessarie al text mining senza tidyverse e carichiamo 56 libri, molti dei quali si trovavano anche nella library utilizzata fino a questo momento, come file di testo, per creare in maniera più comoda un Corpus. Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile.
+
+Le collezioni, ordinate secondo linea temporale, e i rispettivi libri sono:
+**'The Adventures of Sherlock Holmes'**: 'A Scandal in Bohemia', 'The Red-Headed League', 'A Case of Identity', 'The Boscombe Valley Mystery', 'The Five Orange Pips', 'The Man with the Twisted Lip', 'The Adventure of the Blue Carbuncle', 'The Adventure of the Speckled Band', 'The Adventure of the Engineer's Thumb', 'The Adventure of the Noble Bachelor', 'The Adventure of the Beryl Coronet', 'The Adventure of the Copper Beeches'
+'The Memoirs of Sherlock Holmes': 'Silver Blaze', 'Yellow Face', 'The Stoc roker's Clerk', 'The “Gloria Scott"', 'The Musgrave Ritual', 'The Reigate Puzzle', 'The Crooked Man', 'The Resident Patient', 'The Greek Interpreter', 'The Naval Treaty', 'The Final Problem'
+**'The Return of Sherlock Holmes'**: 'The Empty House', 'The Norwood Builder', 'The Dancing Men', 'The Solitary Cyclist', 'The Priory School','Black Peter', 'Charles Augustus Milverton', 'The Six Napoleons', 'The Three Students', 'The Golden Pince-Nez', 'The Missing Three-Quarter', 'The Abbey Grange', 'The Second Stain'
+**'His Last Bow'**:
+'Wisteria Lodge', 'The Cardboard Box', 'The Red Circle', 'The Bruce-Partington Plans', 'The Dying Detective', 'Lady Frances Carfax', 'The Devil's Foot', 'His Last Bow'
+**'The Case-Book of Sherlock Holmes'**:
+'The Illustrious Client', 'The Blanched Soldier', 'The Mazarin Stone', 'The Three Gables', 'The Sussex Vampire', 'The Three Garridebs', 'Thor Bridge', 'The Creeping Man', 'The Lion's Mane', 'The Veiled Lodger', 'Shoscombe Old Place', 'The Retired Colourman'
 
 ```{r}
 library(tm)
@@ -183,6 +191,7 @@ dati <- Corpus(DirSource("C:\\Users\\giudi\\OneDrive\\Desktop\\uni\\data mining\
 ```
 
 A questo punto attuiamo le tecniche base di data mining: togliamo la punteggiatura, i numeri e trasformiamo tutto in minuscolo prima di rimuovere le stopwords di base e gli spazi bianchi.
+
 ```{r}
 dati <- tm_map(dati, removePunctuation)
 dati <- tm_map(dati, removeNumbers)
@@ -193,6 +202,7 @@ dati <- tm_map(dati, stripWhitespace)
 ```
 
 Filtriamo le parole nel corpus, trasformato in testo, per cercare a quali parole appartengano alcune radici che nello stemming (riportato in seguito) sono state tagliate in maniera non del tutto corretta, in modo tale da trasformarle successivamente nelle parole giuste.
+
 ```{r}
 testo_corpus <- sapply(dati, as.character)
 'unlist(str_extract_all(testo_corpus, "\\bspeckl\\w*\\b"))
@@ -219,8 +229,8 @@ testo_corpus <- sapply(dati, as.character)
 # per evitare che li stampasse tutti li abbiamo messi sotto forma di commenti
 ```
 
-Per migliorare le capacità di text mining passiamo alla fase di stemming per raggruppare tutte le parole con lo stesso significato e ridurre la dimensionalità della matrice che creeremo succesivamente.
-Come si può ben vedere abbiamo trattato in maniera più accurata le parole più frequenti che erano state tagliate male dallo stemming di R.
+Per migliorare le capacità di text mining passiamo alla fase di stemming per raggruppare tutte le parole con lo stesso significato e ridurre la dimensionalità della matrice che creeremo succesivamente. Come si può ben vedere abbiamo trattato in maniera più accurata le parole più frequenti che erano state tagliate male dallo stemming di R.
+
 ```{r}
 dati <- tm_map(dati, stemDocument)
 
@@ -396,8 +406,8 @@ dati <- tm_map(dati, content_transformer(gsub), pattern = 'deplor',
                replacement = 'deplorable')
 ```
 
-Togliamo tutte quelle parole che riteniamo non essere utili ai fini dell'analisi, come verbi o sostantivi molto comuni, in modo tale che queste non influenzino i risultati della stessa.
-Abbiamo volutamente lasciato nell'analisi alcune parole con le caratteristiche sopra riportate (che potevano essere eliminate), ma scritte in forma arcaica, perchè utili a spiegare il contesto temporale del libro. Riportiamo ad esempio le parole alway (always) e dyou (you).
+Togliamo tutte quelle parole che riteniamo non essere utili ai fini dell'analisi, come verbi o sostantivi molto comuni, in modo tale che queste non influenzino i risultati della stessa. Abbiamo volutamente lasciato nell'analisi alcune parole con le caratteristiche sopra riportate (che potevano essere eliminate), ma scritte in forma arcaica, perchè utili a spiegare il contesto temporale del libro. Riportiamo ad esempio le parole alway (always) e dyou (you).
+
 ```{r}
 myStopwords <- c("will", "say", "think", "see", "said", "must", "may", "look", "little",
                  "know", "come", "can", "came", "ask", "one", "two", "get", "shall",
@@ -415,8 +425,8 @@ myStopwords <- c("will", "say", "think", "see", "said", "must", "may", "look", "
 dati <- tm_map(dati, removeWords, myStopwords)
 ```
 
-
 Creiamo una Document-Term matrix, cioè una matrice strutturata che rappresenta i testi che stiamo analizzando avente i documenti come righe e i termini come colonne.
+
 ```{r}
 document_term <- DocumentTermMatrix(dati)
 
@@ -425,6 +435,7 @@ inspect(document_term[1:2, 100:105])
 ```
 
 Calcoliamo la frequenza totale dei termini, ordinandoli successivamente per frequenza decrescente, a questo punto visualizziamo i termini più frequenti e quelli meno frequenti.
+
 ```{r}
 freq <- colSums(as.matrix(document_term))
 length(freq)
@@ -433,9 +444,11 @@ ord <- order(freq, decreasing = T)
 freq[head(ord, 100)] 
 freq[tail(ord)]
 ```
+
 Ne risulta che i termini più frequenti sono holmes, hand, watson, time, face, room, house, case, crime con holmes con frequenza esponenzialmente più grande di tutte le altre.
 
 Selezioniamo le prime 50 parole con frequenza maggiore nei testi per le successive analisi. Visualizziamo in forma scritta le parole più frequenti e le associazioni con le parole holmes e watson che ci sembrano rilevanti, essendo essi i protagonisti della storia.
+
 ```{r}
 mfw <- freq[head(ord, 50)]
 
@@ -448,6 +461,7 @@ findAssocs(document_term, 'watson', 0.5)
 ```
 
 Creiamo un istogramma con le parole più frequenti, prendendo quelle che si presentano almeno 500 volte.
+
 ```{r}
 library(ggplot2)
 ggplot(subset(wf, freq > 500), aes(term, occurrences)) +
@@ -458,8 +472,8 @@ ggplot(subset(wf, freq > 500), aes(term, occurrences)) +
 
 Come precedentemente detto, il termine con maggiore frequenza è holmes, che appare quasi 3 volte in più della seconda parola più frequente; mi aspetto pertanto che, nella successiva clusterizzazione, possa apparire come cluster a sé.
 
-
 Di seguito un altro grafico per le parole più frequenti, questa volta con wordcloud da cui si evince ancor più chiaramente quanto già detto per la parola holmes.
+
 ```{r}
 library(wordcloud)
 wordcloud(names(freq), freq, min.freq = 160, colors = viridis::plasma(100))
@@ -468,19 +482,22 @@ wordcloud(names(freq), freq, min.freq = 160, colors = viridis::plasma(100))
 Dal wordcloud vediamo che, a parte holmes e watson, che comunque sono i protagonisti della storia quindi chiaramente sono due delle parole più dette, molte delle parole rimandano a quello che sherlock holmes fa di mestiere cioè l'investigatore come ad esempio crime, case, inspector. Poi abbiamo alcune parole legate al tempo come time e instant, alcune parole legate ai luoghi e alle persone che sherlock spesso descrive e come abbiamo già detto abbiamo lasciato un po' di parole che ci sembravano potessero far capire a chi legge in che posto (london) e in che momento è ambientata la storia, come tutte le parole che nell'inglesse corrente hanno perso la d iniziale (ad esempio dbut).
 
 Creiamo una Term-Document matrix invertendo la matrice Document-Term con solamente le 30 parole più frequenti trovate in precedenza, convertendola poi in forma matriciale per le successive analisi.
+
 ```{r}
 new_document_term <- document_term[, names(mfw)]
 matrix_tdm <- as.matrix(t(new_document_term))
 ```
 
 Definiamo i cluster cominciando con il clustering gerarchico e ne rappresentiamo il dendogramma derivante.
+
 ```{r}
 d_tdm <- dist(matrix_tdm)
 gruppi_tdm <- hclust(d_tdm, method = 'ward.D2')
 plot(gruppi_tdm, hang = -1, main = 'DENDROGRAMMA CLUSTER PAROLE')
 ```
 
-Dividiamo in 4 gruppi e rappresentiamo la suddivisione di seguito. 
+Dividiamo in 4 gruppi e rappresentiamo la suddivisione di seguito.
+
 ```{r}
 cutree(gruppi_tdm, 4)
 
@@ -489,15 +506,17 @@ par(lwd = 2)
 rect.hclust(gruppi_tdm, k = 4, border = 'olivedrab2')
 ```
 
-Il clustering gerarchico qui sopra riportato dividendo le parole in quattro cluster riporta due cluster molto meno numerosi degli altri. Se facciamo particolare attenzione uno dei due è il cluster contentente solo la parola holmes, come già supponevamo in precedenza, mentre l'altro riporta le parole watson e sir che comunque erano due delle parole con maggior frequenza. 
+Il clustering gerarchico qui sopra riportato dividendo le parole in quattro cluster riporta due cluster molto meno numerosi degli altri. Se facciamo particolare attenzione uno dei due è il cluster contentente solo la parola holmes, come già supponevamo in precedenza, mentre l'altro riporta le parole watson e sir che comunque erano due delle parole con maggior frequenza.
 
 Facciamo la stessa suddivisione in gruppi anche con il metodo delle K-Medie, con K=4
+
 ```{r}
 kfit_tdm <- kmeans(d_tdm, centers = 4, nstart = 2)
 
 ```
 
 Rappresentiamo i 4 gruppi con il grafico clusplot.
+
 ```{r}
 library(cluster)
 library(viridis)
@@ -505,23 +524,27 @@ palette <- viridis_pal(option = "D")(length(unique(kfit_tdm$cluster)))
 clusplot(as.matrix(d_tdm), kfit_tdm$cluster, color = T, shade = T, labels = 1, lines =            0, col.p = palette, main = 'PLOT CLUSTER PAROLE')
 par(lwd = 1)
 ```
+
 Possiamo ben visualizzare come la parola holmes sia ben separata dalle altre anche nella rappresentazione grafica, coerentemente con quanto già succedeva con il clustering gerarchico.
 
 Visualizziamo i centroidi per ogni cluster e, successivamente, la dimensione degli stessi cluster.
+
 ```{r}
 print(kfit_tdm)
 kfit_tdm$size
 ```
+
 La divisione con k-medie riporta 4 gruppi composti rispettivamente da 1, 24, 14, 11 parole.
 
 Passiamo ora ad analizzare i documenti, creando una riprendendo la Document-Term matrix, cioè una matrice con i documenti come righe e i termini come colonne.
+
 ```{r}
 inspect(new_document_term[1:3, 1:4])
 matrix_dtm <- as.matrix(new_document_term)
 ```
 
-Eseguiamo le stesse analisi fatte in precedenza per fare questa volta un clustering dei documenti e non delle parole. 
-Abbiamo ritenuto opportuno fare 5 cluster, dal momento che i libri erano suddivisi in 5 macrostorie, di seguito la rappresentazione del clustering gerarchico.
+Eseguiamo le stesse analisi fatte in precedenza per fare questa volta un clustering dei documenti e non delle parole. Abbiamo ritenuto opportuno fare 5 cluster, dal momento che i libri erano suddivisi in 5 macrostorie, di seguito la rappresentazione del clustering gerarchico.
+
 ```{r, echo=FALSE, out.width='80%'}
 d_dtm <- dist(matrix_dtm)
 gruppi_dtm <- hclust(d_dtm, method = 'ward.D2')
@@ -536,7 +559,7 @@ rect.hclust(gruppi_dtm, k = 5, border = 'olivedrab2')
 
 ```
 
-il clustering gerarchico ci restituisce 4 cluster abbastanza numerosi e uno abbastanza meno numeroso degli altri. 
+Il clustering gerarchico ci restituisce 4 cluster abbastanza numerosi e uno abbastanza meno numeroso degli altri.
 
 ```{r}
 kfit_dtm <- kmeans(d_dtm, centers = 5, nstart = 2)
@@ -552,11 +575,17 @@ par(lwd = 1)
 
 ```
 
-I cluster così realizzati sembrano abbastanza equi, difatti le unità sono più o meno equidistribuite cosa che, come sottolineato, non avveniva allo stesso modo con il clustering gerarchico in precedenza. 
-
+I cluster così realizzati sembrano abbastanza equi, difatti le unità sono più o meno equidistribuite, cosa che, come sottolineato, non avveniva allo stesso modo con il clustering gerarchico in precedenza.
+Nonostante questo non sembrano esserci grosse corrispondenze tra i cluster e le raccolte di libri, ciò era prevedibile in quanto l'unico fattore che accomuna i racconti all'interno di una stessa collezione è il periodo in cui sono stati scritti, oltre all'anno di pubblicazione, e non un argomento o una tematica in comune, dunque è difficile che ci possano essere molti elementi lessicali in comune tali da indirizzare la costruzione dei cluster.
 
 ```{r}
 print(kfit_dtm)
 kfit_dtm$size
 ```
 
+## CONCLUSIONE
+
+In conclusione, dalle nostre analisi possiamo evincere come i due metodi di analisi del dataset forniscano risultati simili, ma non uguali.
+Con il mondo Tidyverse la parola più frequente è 'holmes', seguita a breve distanza da 'sir', la quale appare quasi esclusivamente in 'The Hound of the Baskervilles', e più staccate troviamo 'time' 'watson' e altre.
+Con l'analisi del corpus tramite Document-Term c'è sempre 'holmes' al primo posto, qui con una frequenza notevolmente maggiore rispetto alle successive 'hand' e 'watson'.
+Altre considerazioni riguardano il clustering dei documenti, il quale ha portato a risultati meno soddisfacenti rispetto alle parole, ma ciò deriva per larga parte dalla natura delle collezioni, le quali non sono state costruite in base all'argomento.
