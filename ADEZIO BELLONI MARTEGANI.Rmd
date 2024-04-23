@@ -175,8 +175,7 @@ Per la successiva analisi importiamo le library necessarie al text mining e cari
 library(tm)
 library(SnowballC)
 
-sh <- sherlock::holmes
-dati <- VCorpus(VectorSource(sh))
+dati <- Corpus(DirSource("C:/Users/Utente/Desktop/Uni/Data Mining/Sherlock Holmes"))
 
 dati <- tm_map(dati, removePunctuation)
 dati <- tm_map(dati, removeNumbers)
@@ -190,7 +189,7 @@ dati <- tm_map(dati, stripWhitespace)
 testo_corpus <- sapply(dati, as.character)
 ```
 
-Filtro le parole nel corpus trasformato in testo per cercare di cosa siano alcune radici
+Filtro le parole nel corpus trasformato in testo per cercare di cosa siano alcune radici, in modo tale da trasformarle successivamente nelle parole corrette
 
 ```{r}
 (parole_speckl <- unlist(str_extract_all(testo_corpus, "\\bspeckl\\w*\\b")))
@@ -201,9 +200,18 @@ Filtro le parole nel corpus trasformato in testo per cercare di cosa siano alcun
 (parole_grang <- unlist(str_extract_all(testo_corpus, "\\bgrang\\w*\\b")))
 (parole_holm <- unlist(str_extract_all(testo_corpus, "\\bholmesesesd\\w*\\b"))) # mi dice numeric 0 ma se stampo freq ord mi dice che ce ne sono 340
 (parole_dwhat <- unlist(str_extract_all(testo_corpus, "\\bdthe\\w*\\b"))) # non so cosa significa
+(parole_dcrime <- unlist(str_extract_all(testo_corpus, "\\bcri\\w*\\b"))) 
+(parole_not <- unlist(str_extract_all(testo_corpus, "\\bdno\\w*\\b"))) 
+(parole_leavee <- unlist(str_extract_all(testo_corpus, "\\bleav\\w*\\b")))
+(parole_busi <- unlist(str_extract_all(testo_corpus, "\\bbusi\\w*\\b")))
+(parole_coursese <- unlist(str_extract_all(testo_corpus, "\\bcours\\w*\\b")))
+(parole_polic <- unlist(str_extract_all(testo_corpus, "\\bpolic\\w*\\b")))
+(parole_dmi <- unlist(str_extract_all(testo_corpus, "\\bdm\\w*\\b"))) # ci sono dentro un sacco di parole ma la più presente è dmy
+(parole_dmi <- unlist(str_extract_all(testo_corpus, "\\banothing\\w*\\b"))) # non mi dice nulla non so come ci sia arrivato
+unlist(str_extract_all(testo_corpus, "\\bmand\\w*\\b")) # penso sia man'd lo tolgo nelle stopwords
+unlist(str_extract_all(testo_corpus, "\\binde\\w*\\b")) # indeed
+unlist(str_extract_all(testo_corpus, "\\battent\\w*\\b"))
 ```
-
-Modifico alcune parole con radice simile ad altre per farle risultare uguali
 
 ```{r}
 dati <- tm_map(dati, stemDocument)
@@ -252,28 +260,173 @@ dati <- tm_map(dati, content_transformer(gsub), pattern = 'everi',
                replacement = 'every')
 dati <- tm_map(dati, content_transformer(gsub), pattern = 'howev', 
                replacement = 'however')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'cri', 
+               replacement = 'crime')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'noth', 
+               replacement = 'nothing')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'holmesesesd', 
+               replacement = 'holmes')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'possibl', 
+               replacement = 'possible')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'leav', 
+               replacement = 'leave')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'leavee', 
+               replacement = 'leave')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'someth', 
+               replacement = 'something')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'cour', 
+               replacement = 'course')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'coursese', 
+               replacement = 'course')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'courses', 
+               replacement = 'course')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'busi', 
+               replacement = 'business')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'examin', 
+               replacement = 'examine')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'polic', 
+               replacement = 'police')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'tri', 
+               replacement = 'try')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'rememb', 
+               replacement = 'remember')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'realli', 
+               replacement = 'really')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'glanc', 
+               replacement = 'glance')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'observ', 
+               replacement = 'observe')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'strang', 
+               replacement = 'strange')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'lestrad', 
+               replacement = 'lestrade')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'alreadi', 
+               replacement = 'already')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'thatd', 
+               replacement = 'that')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'anyth', 
+               replacement = 'anything')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'watsond', 
+               replacement = 'watson')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'sinc', 
+               replacement = 'since')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'evid', 
+               replacement = 'evident')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'tabl', 
+               replacement = 'table')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'minut', 
+               replacement = 'minute')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'surpris', 
+               replacement = 'surprised')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'togeth', 
+               replacement = 'together')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'larg', 
+               replacement = 'large')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'natur', 
+               replacement = 'nature')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'naturee', 
+               replacement = 'nature')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'largee', 
+               replacement = 'large')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'surpriseded', 
+               replacement = 'surprised')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'minutee', 
+               replacement = 'minute')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'tablee', 
+               replacement = 'table')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'holmesesd', 
+               replacement = 'holmes')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'carri', 
+               replacement = 'carry')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'crimeme', 
+               replacement = 'crime')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'believ', 
+               replacement = 'believe')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'tablee', 
+               replacement = 'table')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'dmi', 
+               replacement = 'dmy')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'perhap', 
+               replacement = 'perhaps')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'imagin', 
+               replacement = 'imagine')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'suppos', 
+               replacement = 'suppose')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'sird', 
+               replacement = 'sir')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'stori', 
+               replacement = 'story')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'inde', 
+               replacement = 'indeed')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'warranti', 
+               replacement = 'warranty')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'voic', 
+               replacement = 'voice')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'abl', 
+               replacement = 'able')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'offic', 
+               replacement = 'office')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'chanc', 
+               replacement = 'chance')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'figur', 
+               replacement = 'figure')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'posit', 
+               replacement = 'position')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'caus', 
+               replacement = 'cause')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'bodi', 
+               replacement = 'body')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'absolut', 
+               replacement = 'absolutely')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'attent', 
+               replacement = 'attention')
 ```
 
-Creo una Document-Term matrix per analizzare i documenti e relativi termini
+Tolgo tutte quelle parole che ritengo non essere utili ai fini dell'analisi, come verbi o sostantivi molto comuni, in modo tale da non influenzare i risultati della stessa
+Ho volutamente lasciato nell'analisi quelle parole con le caratteristiche sopra riportate, ma scritte in forma arcaica, perchè utili a spiegare il contesto temporale del libro
 
 ```{r}
-dtm <- DocumentTermMatrix(dati)
+myStopwords <- c("will", "say", "think", "see", "said", "must", "may", "look", "little",
+                 "know", "come", "can", "came", "ask", "one", "two", "get", "shall",
+                 "might", "like", "find", "made", "make", "now", "heard", "thought",
+                 "way", "just", "much", "tell", "even", "turn", "long", "saw", "never",
+                 "first", "last", "dit", "left", "found", "take", "upon", "give",
+                 "end", "took", "yet", "however", "without", "hard", "man", "knew", 
+                 "leave", "something", "dand", "use", "every", "told", "thing",
+                 "rather", "got", "seen", "pass", "call", "done", "let", "put",
+                 "three", "still", "also", "went", "really", "though", "brought",
+                 "already", "that", "itd", "since", "behind", "gave", "gone", "himd",
+                 "besid", "anothing", "mand", "mani")
+# mani non l'ho trasformato, l'ho direttamente tolto poiché sarebbe many
 
-str(dtm)
-inspect(dtm[1:2, 100:105])
+dati <- tm_map(dati, removeWords, myStopwords)
+```
 
-freq <- colSums(as.matrix(dtm))
+
+Creo una Document-Term matrix, cioè una matrice con i documenti come righe e i termini come colonne
+
+```{r}
+document_term <- DocumentTermMatrix(dati)
+
+str(document_term)
+inspect(document_term[1:2, 100:105])
+```
+
+Calcolo la frequenza totale dei termini, ordinandoli successivamente per frequenza decrescente 
+
+```{r}
+freq <- colSums(as.matrix(document_term))
 length(freq)
 
 ord <- order(freq, decreasing = T)
-freq[head(ord, 100)]
+freq[head(ord, 250)] # tra queste parole c'è alway che è una forma arcaica di always
 freq[tail(ord)]
 ```
 
-Seleziono le prime 30 parole con frequenza maggiore nei testi
+Seleziono le prime 50 parole con frequenza maggiore nei testi
 
 ```{r}
-mfw <- freq[head(ord, 30)]
+mfw <- freq[head(ord, 50)]
 
 wf <- data.frame(term = names(freq),
                  occurrences = freq)
@@ -291,6 +444,9 @@ ggplot(subset(wf, freq > 800), aes(term, occurrences)) +
   labs(title = 'parole più frequenti')
 ```
 
+Il termine con maggiore frequenza è holmes, che appare quasi 3 volte in più della seconda parola più frequente; mi aspetto che, nella successiva clusterizzazione, possa apparire come cluster a sé
+
+
 Di seguito un altro grafico per le parole più frequenti, questa volta con wordcloud
 
 ```{r}
@@ -298,46 +454,85 @@ library(wordcloud)
 wordcloud(names(freq), freq, min.freq = 300, colors = viridis::plasma(100))
 ```
 
-Creo una Document-Term matrix con solamente le 30 parole più frequenti trovate in precedenza, convertendola poi in matrice per le successive analisi
+Creo una Term-Document matrix con solamente le 30 parole più frequenti trovate in precedenza, convertendola poi in matrice per le successive analisi
 
 ```{r}
-new_dtm <- dtm[, names(mfw)]
-matrix <- as.matrix(t(new_dtm))
+new_document_term <- document_term[, names(mfw)]
+matrix_tdm <- as.matrix(t(new_document_term))
 ```
 
 Definisco i cluster cominciando con il clustering gerarchico e rappresento il dendogramma
 
 ```{r}
-d <- dist(matrix)
-gruppi <- hclust(d, method = 'ward.D2')
-plot(gruppi, hang = -1)
+d_tdm <- dist(matrix_tdm)
+gruppi_tdm <- hclust(d_tdm, method = 'ward.D2')
+plot(gruppi_tdm, hang = -1)
 ```
 
-Divido in 4 gruppi
+Divido in 5 gruppi
 
 ```{r}
-cutree(gruppi, 4)
+cutree(gruppi_tdm, 5)
 ```
 
-Provo ad individuare i gruppi anche con il metodo delle K-Medie, con K=4
+Provo ad individuare i gruppi anche con il metodo delle K-Medie, con K=5
 
 ```{r}
-kfit <- kmeans(d, centers = 4, nstart = 2)
+kfit_tdm <- kmeans(d_tdm, centers = 5, nstart = 2)
 par(lwd = 2)
-rect.hclust(gruppi, k = 4, border = 'olivedrab2')
+rect.hclust(gruppi_tdm, k = 5, border = 'olivedrab2')
 ```
 
 Rappresento i 4 gruppi con il grafico clusplot
 
 ```{r}
-par(lwd = 1)
 library(cluster)
-clusplot(as.matrix(d), kfit$cluster, color = T, shade = T, labels = 1, lines = 0)
+palette <- viridis_pal(option = "D")(length(unique(kfit_tdm$cluster)))
+clusplot(as.matrix(d_tdm), kfit_tdm$cluster, color = T, shade = T, labels = 1, lines = 0,
+         col.p = palette, main = 'PLOT CLUSTER PAROLE')
+par(lwd = 1)
 ```
 
 Visualizzo i centroidi per ogni cluster e, successivamente, la dimensione degli stessi cluster
 
 ```{r}
-print(kfit)
-kfit$size
+print(kfit_tdm)
+kfit_tdm$size
 ```
+
+
+Passiamo ora ad analizzare i documenti, creando una Term-Document matrix, cioè una matrice con i termini come righe e i documenti come colonne
+Questa è l'inversa della Document-Term matrix creata in precedenza
+
+```{r}
+matrix_dtm <- as.matrix(new_document_term)
+```
+
+Eseguo le stesse analisi fatte in precedenza
+
+```{r}
+d_tdm <- dist(matrix_tdm)
+gruppi_tdm <- hclust(d_tdm, method = 'ward.D2')
+```
+```{r}
+plot(gruppi_tdm, hang = -1)
+cutree(gruppi_tdm, 4)
+```
+```{r}
+kfit_tdm <- kmeans(d_tdm, centers = 4, nstart = 2)
+
+par(lwd = 2)
+rect.hclust(gruppi_tdm, k = 4, border = 'olivedrab2')
+```
+```{r}
+library(viridis)
+palette <- viridis_pal(option = "D")(length(unique(kfit_tdm$cluster)))
+clusplot(as.matrix(d_tdm), kfit_tdm$cluster, color = T, shade = T, labels = 1, 
+         lines = 0, col.p = palette, main = 'CLUSTER DOCUMENTI')
+```
+```{r}
+par(lwd = 1)
+print(kfit_tdm)
+kfit_tdm$size
+```
+
