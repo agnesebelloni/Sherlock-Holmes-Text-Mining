@@ -151,21 +151,22 @@ testo_corpus <- sapply(dati, as.character)
 (parole_lodg <- unlist(str_extract_all(testo_corpus, "\\blodg\\w*\\b")))
 (parole_nobl <- unlist(str_extract_all(testo_corpus, "\\bnobl\\w*\\b")))
 (parole_boscomb <- unlist(str_extract_all(testo_corpus, "\\bboscomb\\w*\\b")))
-(parole_beech <- unlist(str_extract_all(testo_corpus, "\\bbeech\\w*\\b"))) # faggio
+(parole_beech <- unlist(str_extract_all(testo_corpus, "\\bbeech\\w*\\b")))     # faggio
 (parole_grang <- unlist(str_extract_all(testo_corpus, "\\bgrang\\w*\\b")))
-(parole_holm <- unlist(str_extract_all(testo_corpus, "\\bholmesesed\\w*\\b"))) # mi dice numeric 0 ma se stampo freq ord mi dice che ce ne sono 340
-(parole_dwhat <- unlist(str_extract_all(testo_corpus, "\\bdthe\\w*\\b"))) # non so cosa significa
+(parole_holm <- unlist(str_extract_all(testo_corpus, "\\bholmesesed\\w*\\b"))) # numeric 0 
+(parole_dwhat <- unlist(str_extract_all(testo_corpus, "\\bdthe\\w*\\b")))      # arcaico the
 (parole_dcrime <- unlist(str_extract_all(testo_corpus, "\\bcri\\w*\\b"))) 
 (parole_not <- unlist(str_extract_all(testo_corpus, "\\bdno\\w*\\b"))) 
 (parole_leavee <- unlist(str_extract_all(testo_corpus, "\\bleav\\w*\\b")))
 (parole_busi <- unlist(str_extract_all(testo_corpus, "\\bbusi\\w*\\b")))
 (parole_coursese <- unlist(str_extract_all(testo_corpus, "\\bcours\\w*\\b")))
 (parole_polic <- unlist(str_extract_all(testo_corpus, "\\bpolic\\w*\\b")))
-(parole_dmi <- unlist(str_extract_all(testo_corpus, "\\bdm\\w*\\b"))) # ci sono dentro un sacco di parole ma la più presente è dmy
-(parole_dmi <- unlist(str_extract_all(testo_corpus, "\\banothing\\w*\\b"))) # non mi dice nulla non so come ci sia arrivato
-unlist(str_extract_all(testo_corpus, "\\bmand\\w*\\b")) # penso sia man'd lo tolgo nelle stopwords
-unlist(str_extract_all(testo_corpus, "\\binde\\w*\\b")) # indeed
+(parole_dmi <- unlist(str_extract_all(testo_corpus, "\\bdm\\w*\\b")))          # ci sono dentro un sacco di parole ma la più presente è dmy
+(parole_dmi <- unlist(str_extract_all(testo_corpus, "\\banothing\\w*\\b")))    # numeric 0
+unlist(str_extract_all(testo_corpus, "\\bmand\\w*\\b"))                        # penso sia man'd lo tolgo nelle stopwords
+unlist(str_extract_all(testo_corpus, "\\binde\\w*\\b"))                        # indeed
 unlist(str_extract_all(testo_corpus, "\\battent\\w*\\b"))
+unlist(str_extract_all(testo_corpus, "\\bdeplor\\w*\\b"))
 
 dati <- tm_map(dati, stemDocument)
 
@@ -333,6 +334,12 @@ dati <- tm_map(dati, content_transformer(gsub), pattern = 'absolut',
                replacement = 'absolutely')
 dati <- tm_map(dati, content_transformer(gsub), pattern = 'attent', 
                replacement = 'attention')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'resum', 
+               replacement = 'resume')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'genuin', 
+               replacement = 'genuine')
+dati <- tm_map(dati, content_transformer(gsub), pattern = 'deplor', 
+               replacement = 'deplorable')
 
 myStopwords <- c("will", "say", "think", "see", "said", "must", "may", "look", "little",
                  "know", "come", "can", "came", "ask", "one", "two", "get", "shall",
@@ -367,6 +374,8 @@ wf <- data.frame(term = names(freq),
                  occurrences = freq)
 
 findFreqTerms(document_term, lowfreq = 100)
+findAssocs(document_term, 'holmes', 0.5)
+findAssocs(document_term, 'watson', 0.5)
 
 library(ggplot2)
 ggplot(subset(wf, freq > 500), aes(term, occurrences)) +
@@ -380,27 +389,27 @@ wordcloud(names(freq), freq, min.freq = 150, colors = viridis::plasma(100))
 # creazione di una nuova DTM contenente solo le parole più frequenti
 new_document_term <- document_term[, names(mfw)]
 
-matrix <- as.matrix(t(new_document_term))
+matrix_tdm <- as.matrix(t(new_document_term))
 
-d <- dist(matrix)
-gruppi <- hclust(d, method = 'ward.D2')
+d_tdm <- dist(matrix_tdm)
+gruppi_tdm <- hclust(d_tdm, method = 'ward.D2')
 
-plot(gruppi, hang = -1)
-cutree(gruppi, 5)
+plot(gruppi_tdm, hang = -1)
+cutree(gruppi_tdm, 5)
 
-kfit <- kmeans(d, centers = 5, nstart = 2)
+kfit_tdm <- kmeans(d_tdm, centers = 5, nstart = 2)
 
 par(lwd = 2)
-rect.hclust(gruppi, k = 5, border = 'olivedrab2')
+rect.hclust(gruppi_tdm, k = 5, border = 'olivedrab2')
 
 library(cluster)
 palette <- viridis_pal(option = "D")(length(unique(kfit_tdm$cluster)))
-clusplot(as.matrix(d), kfit$cluster, color = T, shade = T, labels = 1, lines = 0,
+clusplot(as.matrix(d_tdm), kfit_tdm$cluster, color = T, shade = T, labels = 1, lines = 0,
          col.p = palette, main = 'PLOT CLUSTER PAROLE')
 par(lwd = 1)
 
-print(kfit)
-kfit$size
+print(kfit_tdm)
+kfit_tdm$size
 
 
 tdm <- TermDocumentMatrix(dati)
@@ -421,29 +430,29 @@ wf_tdm <- data.frame(term = names(freq_tdm),
 
 findFreqTerms(tdm, lowfreq = 100)
 
-# creazione di una nuova TDM contenente solo le parole più frequenti
-new_tdm <- tdm[names(mfw_tdm), ]
+inspect(new_document_term[1:3, 1:4])
+matrix_dtm <- as.matrix(new_document_term)
 
-matrix_tdm <- as.matrix(t(new_tdm))
+d_dtm <- dist(matrix_dtm)
+gruppi_dtm <- hclust(d_dtm, method = 'ward.D2')
 
-d_tdm <- dist(matrix_tdm)
-gruppi_tdm <- hclust(d_tdm, method = 'ward.D2')
-
-plot(gruppi_tdm, hang = -1)
-cutree(gruppi_tdm, 4)
-
-kfit_tdm <- kmeans(d_tdm, centers = 4, nstart = 2)
+par(mfrow=c(1,1), mar=c(0.1,0.1,0.1,0.1)) 
+plot(gruppi_dtm, hang = -1, main = '')
+cutree(gruppi_dtm, 5)
 
 par(lwd = 2)
-rect.hclust(gruppi_tdm, k = 4, border = 'olivedrab2')
+rect.hclust(gruppi_dtm, k = 5, border = 'olivedrab2')
+
+kfit_dtm <- kmeans(d_dtm, centers = 5, nstart = 2)
+
+par(mfrow=c(1,1), mar = c(5.1, 4.1, 4.1, 2.1)) 
 
 library(viridis)
-palette <- viridis_pal(option = "D")(length(unique(kfit_tdm$cluster)))
-clusplot(as.matrix(d_tdm), kfit_tdm$cluster, color = T, shade = T, labels = 1, 
+palette <- viridis_pal(option = "D")(length(unique(kfit_dtm$cluster)))
+clusplot(as.matrix(d_dtm), kfit_dtm$cluster, color = T, shade = T, labels = 1, 
          lines = 0, col.p = palette, main = 'CLUSTER DOCUMENTI')
 
 par(lwd = 1)
-print(kfit_tdm)
-kfit_tdm$size
 
-
+print(kfit_dtm)
+kfit_dtm$size
