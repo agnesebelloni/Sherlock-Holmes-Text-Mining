@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Questo progetto mira a un'analisi approfondita dei libri di Sherlock Holmes attraverso tecniche di text mining.
+Questo progetto mira a un'analisi approfondita dei libri di Sherlock Holmes di Arthur Conann Doyle attraverso tecniche di text mining.
 
 ## ANALISI ESPLORATIVA CON MONDO TIDYVERSE
 
@@ -171,7 +171,7 @@ Come precedentemente detto dal grafico si evince che le parole Holmes e sir sono
 
 ## ANALISI DEL CORPUS CON DOCUMENT TERM
 
-Per la successiva analisi importiamo le library necessarie al text mining senza tidyverse e carichiamo 56 libri, molti dei quali si trovavano anche nella library utilizzata fino a questo momento, come file di testo, per creare in maniera più comoda un Corpus. Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile.
+Per la successiva analisi importiamo le library necessarie al text mining senza tidyverse e carichiamo 56 libri, molti dei quali si trovavano anche nella library utilizzata fino a questo momento, come file di testo, per creare in maniera più comoda un Corpus. Abbiamo eseguito la seguente operazione perché dentro la library Sherlock i testi si trovavano tutti nello stesso documento pertanto la document-term non era realizzabile. I 56 libri che fanno parte del corpus sono divisi in macro collezioni.
 
 Le collezioni, ordinate secondo linea temporale, e i rispettivi libri sono:
 **'The Adventures of Sherlock Holmes'**: 'A Scandal in Bohemia', 'The Red-Headed League', 'A Case of Identity', 'The Boscombe Valley Mystery', 'The Five Orange Pips', 'The Man with the Twisted Lip', 'The Adventure of the Blue Carbuncle', 'The Adventure of the Speckled Band', 'The Adventure of the Engineer's Thumb', 'The Adventure of the Noble Bachelor', 'The Adventure of the Beryl Coronet', 'The Adventure of the Copper Beeches'
@@ -588,4 +588,4 @@ kfit_dtm$size
 In conclusione, dalle nostre analisi possiamo evincere come i due metodi di analisi del dataset forniscano risultati simili, ma non uguali.
 Con il mondo Tidyverse la parola più frequente è 'holmes', seguita a breve distanza da 'sir', la quale appare quasi esclusivamente in 'The Hound of the Baskervilles', e più staccate troviamo 'time' 'watson' e altre.
 Con l'analisi del corpus tramite Document-Term c'è sempre 'holmes' al primo posto, qui con una frequenza notevolmente maggiore rispetto alle successive 'hand' e 'watson'.
-Altre considerazioni riguardano il clustering dei documenti, il quale ha portato a risultati meno soddisfacenti rispetto alle parole, ma ciò deriva per larga parte dalla natura delle collezioni, le quali non sono state costruite in base all'argomento.
+Altre considerazioni riguardano il clustering dei documenti, il quale ha portato a risultati meno soddisfacenti rispetto a quello delle parole, ma ciò deriva per larga parte dalla natura delle collezioni, le quali non sono state costruite in base all'argomento.
