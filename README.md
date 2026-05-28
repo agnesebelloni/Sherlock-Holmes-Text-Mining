@@ -1,130 +1,192 @@
-# 🔎 Sherlock Holmes Text Mining & NLP Analysis
+# 🔎 Text Mining su Sherlock Holmes — Analisi NLP in R
 
-Questo progetto analizza un insieme di testi delle opere di Sherlock Holmes utilizzando tecniche di Natural Language Processing in R.
+Questo progetto analizza l’intero corpus delle opere di Sherlock Holmes di Arthur Conan Doyle attraverso tecniche di **text mining e natural language processing (NLP)** in R.
 
-Il progetto è esplorativo e confronta due approcci diversi di text mining:
-- tidytext (workflow moderno e tidy)
-- tm package (approccio classico basato su corpus)
+L’analisi confronta due approcci complementari:
+- **tidytext (tidyverse approach)** per analisi esplorativa delle parole
+- **tm package (corpus approach)** per analisi strutturata e clustering
+
+---
+
+## 👥 Autori
+
+- Giuditta Adezio  
+- Agnese Belloni  
+- Luca Martegani  
 
 ---
 
 ## 📚 Dataset
 
-Il dataset proviene dal package R:
+Il dataset proviene dal package:
 
 - `sherlock` (Emil Hvitfeldt)
 
-Include testi di varie opere di Arthur Conan Doyle, tra cui:
-- A Study in Scarlet  
-- A Scandal in Bohemia  
-- The Hound of the Baskervilles  
-- His Last Bow  
-- e altri racconti
+Contiene testi completi delle opere principali di Arthur Conan Doyle, tra cui:
+- *The Adventures of Sherlock Holmes*
+- *The Memoirs of Sherlock Holmes*
+- *The Return of Sherlock Holmes*
+- *His Last Bow*
+- *The Case-Book of Sherlock Holmes*
 
 ---
 
-## 🎯 Obiettivi
+## 🎯 Obiettivi del progetto
 
-- Analizzare la frequenza delle parole nei diversi libri
-- Confrontare il linguaggio tra opere
-- Identificare parole caratteristiche di ciascun testo
-- Applicare tecniche di clustering su dati testuali
-- Confrontare approcci NLP diversi in R
+- Analizzare la frequenza delle parole nei testi
+- Confrontare linguaggio tra più libri
+- Identificare parole caratteristiche dei protagonisti e del contesto narrativo
+- Applicare tecniche di clustering su parole e documenti
+- Confrontare due pipeline NLP differenti in R
 
 ---
 
-## 🧰 Librerie utilizzate
+# 🧪 PARTE 1 — ANALISI CON TIDYVERSE / TIDYTEXT
+
+## 🔧 Preprocessing
+- Tokenizzazione dei testi con `unnest_tokens`
+- Estrazione parole per libro
+- Creazione variabile capitolo
+- Rimozione stopwords
+
+---
+
+## 📊 Analisi esplorativa
+
+- Frequenze assolute delle parole
+- Top parole per ciascun libro
+- Analisi globale del corpus
+
+Risultato principale:
+- Le parole più frequenti includono *holmes*, *sir*, *time*, *watson*
+- *The Hound of the Baskervilles* mostra frequenze più elevate rispetto agli altri testi
+
+---
+
+## 📈 Visualizzazioni
+
+- Barplot delle parole più frequenti per libro
+- Grafici facettati per confronto tra testi
+- Wordcloud delle parole globali
+
+---
+
+## 📉 Analisi statistica
+
+- Frequenze relative per libro e globali
+- Correlazione tra distribuzioni lessicali
+- Identificazione parole più rappresentative per ciascun testo
+
+---
+
+# 🧪 PARTE 2 — ANALISI CON TM / CORPUS APPROACH
+
+## 🔧 Preprocessing del corpus
+
+- Creazione corpus da file locali
+- Pulizia testo:
+  - rimozione punteggiatura e numeri
+  - conversione in minuscolo
+  - rimozione stopwords
+- Stemming con `SnowballC`
+- Normalizzazione manuale di termini problematici
+
+---
+
+## 🧠 Feature extraction
+
+- Document-Term Matrix (DTM)
+- Term-Document Matrix (TDM)
+- Calcolo frequenze assolute dei termini
+
+---
+
+## 🔍 Analisi lessicale
+
+- Termini più frequenti nel corpus
+- Associazioni lessicali con *holmes* e *watson*
+- Analisi parole caratteristiche del contesto investigativo
+
+---
+
+## 📊 Clustering parole
+
+- Clustering gerarchico (Ward.D2)
+- K-means clustering
+- Visualizzazione con dendrogrammi e clusplot
+
+Risultati principali:
+- *holmes* forma un cluster isolato
+- *watson* e *sir* emergono come gruppo distinto
+- Forte separazione tra parole altamente frequenti e il resto del vocabolario
+
+---
+
+## 📚 Clustering documenti
+
+- Clustering dei libri basato su DTM
+- 5 cluster (coerenti con macro-raccolte editoriali)
+- Confronto tra clustering gerarchico e k-means
+
+Osservazioni:
+- I cluster non corrispondono perfettamente alle raccolte narrative
+- La struttura editoriale non riflette necessariamente contenuti tematici
+
+---
+
+# 📌 RISULTATI PRINCIPALI
+
+- *Holmes* è la parola dominante in tutti gli approcci
+- Il lessico è fortemente legato a contesto investigativo (crime, case, inspector)
+- Il dataset mostra forte squilibrio tra frequenze delle parole
+- Il clustering delle parole è più informativo rispetto a quello dei documenti
+- I due approcci NLP producono risultati coerenti ma con diversa granularità
+
+---
+
+# ⚖️ CONFRONTO TRA APPROCCI
+
+| Metodo | Punti di forza | Limiti |
+|--------|----------------|--------|
+| tidytext | semplice, leggibile, rapido | meno controllo sul preprocessing |
+| tm | potente, controllabile | più complesso e manuale |
+
+---
+
+# 🚀 CONCLUSIONI
+
+Il progetto mostra come tecniche diverse di NLP in R permettano di esplorare lo stesso corpus da prospettive differenti.
+
+Il linguaggio delle opere di Sherlock Holmes è fortemente caratterizzato da:
+- ripetizione dei protagonisti
+- vocabolario investigativo
+- forte dominanza di pochi termini chiave
+
+---
+
+# 🧰 Librerie utilizzate
 
 - tidyverse
 - tidytext
 - stringr
-- dplyr
-- ggplot2
-- wordcloud
-- RColorBrewer
 - tm
 - SnowballC
+- ggplot2
+- wordcloud
 - cluster
 - viridis
+- RColorBrewer
 
 ---
 
-## 🔄 Pipeline 1 — Approccio tidytext
-
-### 🔹 Preprocessing
-- Tokenizzazione dei testi
-- Estrazione parole con `unnest_tokens`
-- Rimozione stopwords
-- Creazione variabile chapter
-
-### 🔹 Analisi
-- Frequenza parole globali e per libro
-- Top 10 parole per ciascuna opera
-- Analisi percentuale delle parole
-
-### 🔹 Visualizzazione
-- Barplot facettati per libro
-- Grafici delle parole più frequenti
-- Wordcloud
-
-### 🔹 Statistica
-- Correlazione tra frequenze locali e globali
-
----
-
-## 🔄 Pipeline 2 — Approccio tm (classico)
-
-### 🔹 Preprocessing corpus
-- Creazione corpus da directory
-- Pulizia: punteggiatura, numeri, maiuscole
-- Rimozione stopwords personalizzate
-- Stemming con `SnowballC`
-- Normalizzazione manuale delle parole
-
-### 🔹 Feature extraction
-- Document-Term Matrix (DTM)
-- Term-Document Matrix (TDM)
-
-### 🔹 Analisi
-- Frequenze assolute
-- Associazioni tra parole (es. Holmes, Watson)
-
-### 🔹 Clustering
-- Clustering gerarchico (Ward.D2)
-- K-means clustering
-- Visualizzazione cluster (dendrogrammi e clusplot)
-
----
-
-## 📊 Risultati principali
-
-- Le parole più frequenti sono coerenti tra i libri ma con differenze stilistiche
-- Holmes e Watson emergono come termini centrali e fortemente associati
-- Il clustering separa parzialmente testi e vocaboli in gruppi coerenti
-- L’approccio tidytext è più leggibile e riproducibile
-- L’approccio tm è più manuale ma consente maggiore controllo fine
-
----
-
-## ⚠️ Nota sul progetto
-
-Questo è un progetto esplorativo realizzato durante lo studio di text mining in R.
-
-Il codice include:
-- esperimenti progressivi
-- pulizia manuale estensiva
-- test di tecniche diverse
-- alcune parti non ottimizzate o ridondanti
-
----
-
-## 🚀 Come eseguire
+# ▶️ Come eseguire il progetto
 
 ```r
 install.packages(c(
-  "sherlock", "tidyverse", "tidytext",
+  "tidyverse", "tidytext", "sherlock",
   "tm", "SnowballC", "wordcloud",
   "cluster", "viridis"
 ))
 
-source("sherlock_analysis.R")
+# eseguire lo script principale
+source("sherlock_project.R")
